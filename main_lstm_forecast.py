@@ -31,7 +31,7 @@ import numpy as np
 end_date = date.today().strftime("%Y-%m-%d")
 start_date = '2020-01-01'
 
-df = yf.download('AAPL', start=start_date, end=end_date)
+df = yf.download('PETR4.SA', start=start_date, end=end_date)
 
 # Inspect the data
 print(df.head())
