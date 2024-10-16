@@ -276,7 +276,7 @@ plt.show()
 #######################   PERFORMANCE METRICS   ###########################
 ############################################################################
 
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import root_mean_squared_error, r2_score
 
 # Evaluate the model and calculate RMSE and R² score
 model.eval()
@@ -289,7 +289,7 @@ with torch.no_grad():
 test_predictions = np.array(test_predictions)
 
 # Calculate RMSE and R² score
-rmse = np.sqrt(mean_squared_error(y_test.cpu().numpy(), test_predictions))
+rmse = root_mean_squared_error(y_test.cpu().numpy(), test_predictions)
 r2 = r2_score(y_test.cpu().numpy(), test_predictions)
 
 print(f'RMSE: {rmse:.4f}')
