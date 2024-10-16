@@ -1,55 +1,45 @@
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-from matplotlib import rc
-from collections import defaultdict
-
-from tqdm.notebook import tqdm
-from pylab import rcParams
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
-
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error, r2_score
-
 import mlflow
 import mlflow.pytorch
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+############################################################################
+##################  SOME GENERAL PLOT  CONFIGURATIONS  #####################
+############################################################################
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+from matplotlib import rc
+from tqdm.notebook import tqdm
 
 # %matplotlib inline
 
-sns.set(style='whitegrid', palette='muted', font_scale=1.2)
+sns.set_theme(style='whitegrid', palette='muted', font_scale=1.2)
 
 Colour_Palette = ['#01BEFE', '#FF7D00', '#FFDD00', '#FF006D', '#ADFF02', '#8F00FF']
 sns.set_palette(sns.color_palette(Colour_Palette))
 
 tqdm.pandas()
 
-input_size = 10
-hidden_size = 50
-num_layers = 2
-output_size = 1
-num_epochs = 10
-batch_size = 64
-learning_rate = 0.001
+############################################################################
+###############  YFINANCE - DOWNLOAD DATA AND CREATE DF  ###################
+############################################################################
 
 import yfinance as yf
 from datetime import date
+import pandas as pd
+import numpy as np
 
 end_date = date.today().strftime("%Y-%m-%d")
-start_date = '2024-01-01'
+start_date = '2020-01-01'
 
 df = yf.download('AAPL', start=start_date, end=end_date)
 
 # Inspect the data
 print(df.head())
 print(df.info())
+
+############################################################################
+############  FUNCTION TO PLOT YFINANCE DATA THROUGH DATES  ################
+############################################################################
 
 import matplotlib.dates as mdates
 
@@ -71,8 +61,11 @@ def data_plot(df):
 # Plot the data
 data_plot(df)
 
+############################################################################
+##############  SPLIT TRAIN AND TEST DATA + RESHAPE DATA  ##################
+############################################################################
+
 import math
-from sklearn.preprocessing import MinMaxScaler
 
 # Train test split
 training_data_len = math.ceil(len(df) * .8)
@@ -95,6 +88,12 @@ dataset_test = test_data.Open.values
 dataset_test = np.reshape(dataset_test, (-1, 1))
 print(dataset_test.shape)
 
+############################################################################
+####################  SCALING DATA WITH MINMAXSCALER  ######################
+############################################################################
+
+from sklearn.preprocessing import MinMaxScaler
+
 scaler = MinMaxScaler(feature_range=(0, 1))
 # Scaling dataset
 scaled_train = scaler.fit_transform(dataset_train)
@@ -104,6 +103,10 @@ print(scaled_train[:5])
 scaled_test = scaler.fit_transform(dataset_test)
 print(scaled_test[:5])
 
+############################################################################
+##############  SPLIT DATA INTO X (INPUTS) AND Y (LABLES)  #################
+############################################################################
+
 # Create sequences and labels for training data
 sequence_length = 50  # Number of time steps to look back
 X_train, y_train = [], []
@@ -111,11 +114,6 @@ for i in range(len(scaled_train) - sequence_length):
     X_train.append(scaled_train[i:i + sequence_length])
     y_train.append(scaled_train[i + sequence_length])  # Predicting the value right after the sequence
 X_train, y_train = np.array(X_train), np.array(y_train)
-
-# Convert data to PyTorch tensors
-X_train = torch.tensor(X_train, dtype=torch.float32)
-y_train = torch.tensor(y_train, dtype=torch.float32)
-print(X_train.shape, y_train.shape)
 
 # Create sequences and labels for testing data
 sequence_length = 30  # Number of time steps to look back
@@ -125,11 +123,29 @@ for i in range(len(scaled_test) - sequence_length):
     y_test.append(scaled_test[i + sequence_length])  # Predicting the value right after the sequence
 X_test, y_test = np.array(X_test), np.array(y_test)
 
+############################################################################
+################  CONVERT DATA TO PYTORCH TENSOR  ##########################
+############################################################################
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+
+# Convert data to PyTorch tensors
+X_train = torch.tensor(X_train, dtype=torch.float32)
+y_train = torch.tensor(y_train, dtype=torch.float32)
+print(X_train.shape, y_train.shape)
+
 # Convert data to PyTorch tensors
 X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.float32)
 print(X_test.shape, y_test.shape)
 
+############################################################################
+##############  CREATING LSTM CUSTOM CLASS WITH LINEAR OUT  ################
+############################################################################
 
 class LSTMModel(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, dropout=0.2):
@@ -142,6 +158,10 @@ class LSTMModel(nn.Module):
         out = self.linear(out[:, -1, :])
         return out
 
+############################################################################
+######################  SETUP / CONFIGS FOR TRAINING  ######################
+############################################################################
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 
@@ -150,10 +170,11 @@ num_layers = 3  # Increased number of layers
 hidden_size = 128  # Increased number of hidden units
 output_size = 1
 dropout = 0.2  # Added dropout for regularization
+learning_rate = 0.001
 
 model = LSTMModel(input_size, hidden_size, num_layers, dropout).to(device)
 loss_fn = nn.MSELoss(reduction='mean')
-optimizer = optim.Adam(model.parameters(), lr=1e-3)  # Learning rate
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)  # Learning rate
 
 batch_size = 32  # Adjusted batch size
 train_dataset = TensorDataset(X_train, y_train)
@@ -164,6 +185,10 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 num_epochs = 100  # Increased number of epochs
 train_hist = []
 test_hist = []
+
+############################################################################
+###################  LSTM TRAINING // LSTM TRANING  ########################
+############################################################################
 
 for epoch in range(num_epochs):
     total_loss = 0.0
@@ -199,11 +224,19 @@ for epoch in range(num_epochs):
     if (epoch + 1) % 10 == 0:
         print(f'Epoch [{epoch + 1}/{num_epochs}] - Training Loss: {average_loss:.4f}, Test Loss: {average_test_loss:.4f}')
 
+############################################################################
+#########################  PLOT TRAINING RESULTS  ##########################
+############################################################################
+
 x = np.linspace(1,num_epochs,num_epochs)
 plt.plot(x,train_hist,scalex=True, label="Training loss")
 plt.plot(x, test_hist, label="Test loss")
 plt.legend()
 plt.show()
+
+############################################################################
+#################### PREDICT // FORECAST RESULTS  ##########################
+############################################################################
 
 num_forecast_steps = 30
 sequence_to_plot = X_test.squeeze().cpu().numpy()
@@ -221,6 +254,12 @@ with torch.no_grad():
 last_date = test_data.index[-1]
 future_dates = pd.date_range(start=last_date + pd.DateOffset(1), periods=30)
 
+############################################################################
+####################### PLOT PREDICT // FORECAST ###########################
+############################################################################
+
+from pylab import rcParams
+
 plt.rcParams['figure.figsize'] = [14, 4]
 plt.plot(test_data.index[-100:], test_data.Open[-100:], label="test_data", color="b")
 plt.plot(test_data.index[-30:], test_data.Open[-30:], label='actual values', color='green')
@@ -232,6 +271,12 @@ plt.legend()
 plt.title('Time Series Forecasting')
 plt.grid(True)
 plt.show()
+
+############################################################################
+#######################   PERFORMANCE METRICS   ###########################
+############################################################################
+
+from sklearn.metrics import mean_squared_error, r2_score
 
 # Evaluate the model and calculate RMSE and R² score
 model.eval()
