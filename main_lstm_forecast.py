@@ -190,6 +190,11 @@ test_hist = []
 ###################  LSTM TRAINING // LSTM TRANING  ########################
 ############################################################################
 
+import time
+
+start_time = time.time()
+print(f"Starting training: {start_time}")
+
 for epoch in range(num_epochs):
     total_loss = 0.0
     model.train()
@@ -223,6 +228,10 @@ for epoch in range(num_epochs):
 
     if (epoch + 1) % 10 == 0:
         print(f'Epoch [{epoch + 1}/{num_epochs}] - Training Loss: {average_loss:.4f}, Test Loss: {average_test_loss:.4f}')
+
+end_time = time.time()
+print(f"Ending training: {end_time}")
+print(f"Elapsed Training time: {end_time - start_time}")
 
 ############################################################################
 #########################  PLOT TRAINING RESULTS  ##########################
