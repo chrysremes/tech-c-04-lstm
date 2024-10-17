@@ -28,8 +28,8 @@ from datetime import date
 import pandas as pd
 import numpy as np
 
-end_date = date.today().strftime("%Y-%m-%d")
-start_date = '2020-01-01'
+end_date = date.today().strftime("%Y-%m-%d") # GRUPO : DECIDIR
+start_date = '2020-01-01'                    # GRUPO : DECIDIR
 ticket = 'PETR4.SA'
 
 df = yf.download(ticket, start=start_date, end=end_date)
@@ -69,7 +69,7 @@ data_plot(df)
 import math
 
 # Train test split
-training_data_len = math.ceil(len(df) * .8)
+training_data_len = math.ceil(len(df) * .8)     # GRUPO : DECIDIR
 print(training_data_len)
 
 # Splitting the dataset
@@ -78,13 +78,13 @@ test_data = df[training_data_len:].iloc[:, :1]
 print(train_data.shape, test_data.shape)
 
 # Selecting Open Price values
-dataset_train = train_data.Open.values
+dataset_train = train_data.Open.values  # GRUPO : VERIFICAR
 # Reshaping 1D to 2D array
 dataset_train = np.reshape(dataset_train, (-1, 1))
 print(dataset_train.shape)
 
 # Selecting Open Price values
-dataset_test = test_data.Open.values
+dataset_test = test_data.Open.values    # GRUPO : VERIFICAR
 # Reshaping 1D to 2D array
 dataset_test = np.reshape(dataset_test, (-1, 1))
 print(dataset_test.shape)
@@ -95,7 +95,7 @@ print(dataset_test.shape)
 
 from sklearn.preprocessing import MinMaxScaler
 
-scaler = MinMaxScaler(feature_range=(0, 1))
+scaler = MinMaxScaler(feature_range=(0, 1))     # GRUPO : DECIDIR
 # Scaling dataset
 scaled_train = scaler.fit_transform(dataset_train)
 print(scaled_train[:5])
@@ -109,7 +109,7 @@ print(scaled_test[:5])
 ############################################################################
 
 # Create sequences and labels for training data
-sequence_length = 50  # Number of time steps to look back
+sequence_length = 50  # Number of time steps to look back   / # GRUPO : VERIFICAR
 X_train, y_train = [], []
 for i in range(len(scaled_train) - sequence_length):
     X_train.append(scaled_train[i:i + sequence_length])
@@ -117,7 +117,7 @@ for i in range(len(scaled_train) - sequence_length):
 X_train, y_train = np.array(X_train), np.array(y_train)
 
 # Create sequences and labels for testing data
-sequence_length = 30  # Number of time steps to look back
+sequence_length = 30  # Number of time steps to look back   / # GRUPO : VERIFICAR
 X_test, y_test = [], []
 for i in range(len(scaled_test) - sequence_length):
     X_test.append(scaled_test[i:i + sequence_length])
@@ -166,24 +166,24 @@ class LSTMModel(nn.Module):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 
-input_size = 1
-num_layers = 3  # Increased number of layers
-hidden_size = 128  # Increased number of hidden units
+input_size = 1          # GRUPO : HYPERPARAMETROS
+num_layers = 4          # GRUPO : HYPERPARAMETROS
+hidden_size = 180       # GRUPO : HYPERPARAMETROS
 output_size = 1
-dropout = 0.2  # Added dropout for regularization
-learning_rate = 0.001
+dropout = 0.2           # Regulatization // GRUPO : HYPERPARAMETROS
+learning_rate = 0.0005  # GRUPO : HYPERPARAMETROS
 
 model = LSTMModel(input_size, hidden_size, num_layers, dropout).to(device)
-loss_fn = nn.MSELoss(reduction='mean')
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)  # Learning rate
+loss_fn = nn.MSELoss(reduction='mean')  # GRUPO : DECIDIR
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)  # GRUPO : DECIDIR
 
-batch_size = 32  # Adjusted batch size
+batch_size = 32  # GRUPO : VERIFICAR
 train_dataset = TensorDataset(X_train, y_train)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_dataset = TensorDataset(X_test, y_test)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-num_epochs = 100  # Increased number of epochs
+num_epochs = 200  # GRUPO : HYPERPARAMETROS
 train_hist = []
 test_hist = []
 
