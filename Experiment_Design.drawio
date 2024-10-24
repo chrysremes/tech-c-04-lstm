@@ -1,0 +1,97 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0" version="24.7.17">
+  <diagram name="Page-1" id="Rio_EH9SzowqRbI24mdI">
+    <mxGraphModel dx="2633" dy="976" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="wbeVTTchQjVvqrqkAahr-1" value="Initial&amp;nbsp;&lt;div&gt;List of Variables&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-2" value="Open&lt;div&gt;High&lt;/div&gt;&lt;div&gt;Low&lt;/div&gt;&lt;div&gt;Close&lt;/div&gt;&lt;div&gt;Adj Close&lt;/div&gt;&lt;div&gt;Volume&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="210" y="290" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-3" value="What is Adj Close and Volume?" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="290" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-4" value="Understanding Variables" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="365" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-5" value="Correlation Analysis" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-6" value="Any of them are redundant?&lt;div&gt;Can we drop some a priori?&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="525" y="300" width="130" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-7" value="Fase 2&lt;div&gt;Definition of Historical Input Variables&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="130" width="450" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-8" value="Define a set of exogenous inputs" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="810" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-9" value="Fase 3&lt;div&gt;[Optional] Enrichment - Using additional Data&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="810" y="130" width="620" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-10" value="&lt;div&gt;Fase 1&lt;/div&gt;Define an initial baseline model for comparison" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-340" y="130" width="450" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-11" value="Use just Close variable" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-340" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-12" value="Define a set of standard hyperparameters" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-175" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-13" value="Result:&lt;div&gt;baseline model&lt;/div&gt;&lt;div&gt;understanding of epochs&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-255" y="390" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-14" value="Result:&lt;div&gt;defined historical input variables in comparison with baseline model&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="348" y="400" width="155" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-15" value="* Petrol international price&lt;div&gt;* Currency&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="285" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-16" value="Clean and merge datasets" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="975" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-17" value="Define an architecture to deal with new data" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-18" value="Comparison" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-19" value="&lt;div&gt;* Get daily values (as yfinance)&lt;/div&gt;&lt;div&gt;* Join on Timestamps&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="985" y="280" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-20" value="&lt;div&gt;* Input values in the LSTM or just on the final NN?&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="280" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-21" value="Result:&lt;div&gt;defined new architecture to be trained&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1042.5" y="380" width="155" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-22" value="&lt;div&gt;num_layers&lt;/div&gt;&lt;div&gt;hidden_size&lt;/div&gt;&lt;div&gt;dropout&lt;/div&gt;&lt;div&gt;optim&lt;/div&gt;&lt;div&gt;learning rate&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-165" y="290" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-23" value="Fase 4&lt;div&gt;Fine Tuning of Hyperparameters&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1520" y="130" width="440" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-24" value="Define and fix some window length params" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-10" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-25" value="sequence_length&lt;div&gt;batch_size&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry y="290" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-26" value="&lt;div&gt;num_layers&lt;/div&gt;&lt;div&gt;hidden_size&lt;/div&gt;&lt;div&gt;dropout&lt;/div&gt;&lt;div&gt;optim&lt;/div&gt;&lt;div&gt;learning rate&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="290" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-27" value="Define the Sampling Tree" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1520" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-28" value="Make the tests and log with mlflow" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1680" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wbeVTTchQjVvqrqkAahr-29" value="Find the champion model" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1840" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
