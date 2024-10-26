@@ -68,29 +68,41 @@ from plot_fn import data_plot_multindex, data_plot
 
 import math
 
+# Selecting only Close Values for everyone
 df = df_full['Close']
 
-print(df)
-
 # Train test split
-training_data_len = math.ceil(len(df) * .8)     # GRUPO : DECIDIR
-print(training_data_len)
 
-# Splitting the dataset
-train_data = df[:training_data_len].iloc[:, 0:n_tickers]
-test_data = df[training_data_len:].iloc[:, :n_tickers]
-print(train_data.shape, test_data.shape)
+def train_test_split_fn(df, train_perc_size):
 
-# Selecting Open Price values
-dataset_train = train_data.values  # GRUPO : CLOSE
-# Reshaping 1D to 2D array
-dataset_train = np.reshape(dataset_train, (-1, n_tickers))
+    training_data_len = math.ceil(len(df) * train_perc_size)     # GRUPO : DECIDIR
+    print(training_data_len)
+
+    # Splitting the dataset
+    train_data = df[:training_data_len].iloc[:, 0:n_tickers]
+    test_data = df[training_data_len:].iloc[:, :n_tickers]
+    print(train_data.shape, test_data.shape)
+
+    return train_data, test_data
+
+train_data, test_data = train_test_split_fn(df,train_perc_size=0.8)
+
+def reshape_to_np_array(train_data, test_data, new_size):
+
+    # Selecting Open Price values
+    dataset_train = train_data.values  # GRUPO : CLOSE
+    # Reshaping 1D to 2D array
+    dataset_train = np.reshape(dataset_train, (-1, new_size))
+
+    # Selecting Open Price values
+    dataset_test = test_data.values    # GRUPO : CLOSE
+    # Reshaping 1D to 2D array
+    dataset_test = np.reshape(dataset_test, (-1, new_size))
+
+    return dataset_train, dataset_test
+
+dataset_train, dataset_test =  reshape_to_np_array(train_data, test_data, n_tickers)
 print(dataset_train.shape)
-
-# Selecting Open Price values
-dataset_test = test_data.values    # GRUPO : CLOSE
-# Reshaping 1D to 2D array
-dataset_test = np.reshape(dataset_test, (-1, n_tickers))
 print(dataset_test.shape)
 
 ############################################################################
@@ -116,21 +128,23 @@ print(scaled_test[:5])
 
 # COLOCAR ESSE STEP NA PIPELINE DE DADOS
 
-# Create sequences and labels for training data
-sequence_length_train = 50  # Number of time steps to look back   / # GRUPO : VERIFICAR
-X_train, y_train = [], []
-for i in range(len(scaled_train) - sequence_length_train):
-    X_train.append(scaled_train[i:i + sequence_length_train,0:n_tickers])
-    y_train.append(scaled_train[i + sequence_length_train,n_tickers-1:])  # Predicting the value right after the sequence
-X_train, y_train = np.array(X_train), np.array(y_train)
+def create_dataset_from_moving_window(scaled_data, window_length, n_features):
+    
+    # Create sequences and labels for training data
+    L_dataset = len(scaled_data)
+    X, y = [], []
+    for i in range(L_dataset - window_length):
+        X.append(scaled_data[i:i + window_length,0:n_features])
+        y.append(scaled_data[i + window_length,n_features-1:])  # Predicting the value right after the sequence
+    X, y = np.array(X), np.array(y)
+    return X, y
 
-# Create sequences and labels for testing data
-sequence_length_test = 50  # Number of time steps to look back   / # GRUPO : COLOCAR IGUAL
-X_test, y_test = [], []
-for i in range(len(scaled_test) - sequence_length_test):
-    X_test.append(scaled_test[i:i + sequence_length_test,0:n_tickers])
-    y_test.append(scaled_test[i + sequence_length_test,n_tickers-1:])  # Predicting the value right after the sequence
-X_test, y_test = np.array(X_test), np.array(y_test)
+W_train = 50
+W_test = 50
+X_train, y_train = create_dataset_from_moving_window(scaled_train, window_length=W_train, n_features=n_tickers)
+X_test, y_test = create_dataset_from_moving_window(scaled_test, window_length=W_test, n_features=n_tickers)
+print(X_train.shape, y_train.shape)
+print(X_test.shape, y_test.shape)
 
 ############################################################################
 ################  CONVERT DATA TO PYTORCH TENSOR  ##########################
@@ -188,7 +202,7 @@ optimizer = optim.Adam(model.parameters(), lr=learning_rate)  # GRUPO : DECIDIR
 
 batch_size = 30  # GRUPO : VERIFICAR
 train_dataset = TensorDataset(X_train, y_train)
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
 test_dataset = TensorDataset(X_test, y_test)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -204,8 +218,8 @@ params_to_log = {
     "start_date" : stock_start_date,
     "end_date" : stock_end_date,
     "batch_size" : batch_size,
-    "sequence_length_train" : sequence_length_train,
-    "sequence_length_test" : sequence_length_test,
+    "sequence_length_train" : W_train,
+    "sequence_length_test" : W_test,
     "input_size" : input_size,
     "num_layers" : num_layers,
     "hidden_size" : hidden_size,
@@ -285,7 +299,7 @@ with mlflow.start_run():
     #################### PREDICT // FORECAST RESULTS  ##########################
     ############################################################################
 
-    num_forecast_steps = 10
+    num_forecast_steps = 30
     sequence_to_plot = X_test.squeeze().cpu().numpy()
     print(sequence_to_plot.shape)
     historical_data = sequence_to_plot[-1]
@@ -295,9 +309,9 @@ with mlflow.start_run():
     with torch.no_grad():
         for _ in range(num_forecast_steps):
             historical_data_tensor = torch.as_tensor(historical_data).view(1, -1, n_tickers).float().to(device)
-            print(historical_data_tensor.shape)
+            # print(historical_data_tensor.shape)
             predicted_value = model(historical_data_tensor).cpu().numpy()[0, 0]
-            print(predicted_value.shape)
+            # print(predicted_value.shape)
             forecasted_values.append(predicted_value)
             historical_data = np.roll(historical_data, shift=-1)
             historical_data[-1] = predicted_value
