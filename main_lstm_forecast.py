@@ -190,8 +190,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 
 input_size = n_tickers          # GRUPO : HYPERPARAMETROS
-num_layers = 10         # GRUPO : HYPERPARAMETROS
-hidden_size = 100       # GRUPO : HYPERPARAMETROS
+num_layers = 4         # GRUPO : HYPERPARAMETROS
+hidden_size = 50       # GRUPO : HYPERPARAMETROS
 output_size = 1
 dropout = 0.2           # Regulatization // GRUPO : HYPERPARAMETROS
 learning_rate = 0.001  # GRUPO : HYPERPARAMETROS
