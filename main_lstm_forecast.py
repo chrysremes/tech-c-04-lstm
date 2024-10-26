@@ -33,37 +33,34 @@ import numpy as np
 
 stock_end_date = date.today().strftime("%Y-%m-%d") # GRUPO : DECIDIR
 stock_start_date = '2020-01-01'                    # GRUPO : DECIDIR
-ticket = 'PETR4.SA'
+tickers = ['PETR4.SA', 'BZ=F', '6L=F']
 
-df = yf.download(ticket, start=stock_start_date, end=stock_end_date)
+df_full = yf.download(tickers, start=stock_start_date, end=stock_end_date)
 
 # Inspect the data
-print(df.head())
-print(df.info())
+print(df_full.head())
+print(df_full.info())
+
+# Split into 1 sub DataFrame by ticker
+n_tickers = len(tickers)
+sub_df = {}
+for tk in tickers:
+    sub_df[tk] = df_full.xs(key=tk, level='Ticker', axis=1, drop_level=False)
 
 ############################################################################
 ############  FUNCTION TO PLOT YFINANCE DATA THROUGH DATES  ################
 ############################################################################
 
-import matplotlib.dates as mdates
-
-def data_plot(df):
-    # Plot line charts
-    df_plot = df.copy()
-
-    ncols = 2
-    nrows = int(round(df_plot.shape[1] / ncols, 0))
-
-    fig, ax = plt.subplots(nrows=nrows, ncols=ncols, sharex=True, figsize=(14, 7))
-    for i, ax in enumerate(fig.axes):
-        sns.lineplot(data=df_plot.iloc[:, i], ax=ax)
-        ax.tick_params(axis="x", rotation=30, labelsize=10, length=0)
-        ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-    fig.tight_layout()
-    plt.show()
+from plot_fn import data_plot_multindex, data_plot
 
 # Plot the data
-data_plot(df)
+# data_plot_multindex(df_full,n_tickers)
+
+# data_plot(sub_df['PETR4.SA'])
+# data_plot(sub_df['CL=F'])
+# data_plot(sub_df['BZ=F'])
+# data_plot(sub_df['6L=F'])
+# plt.show()
 
 ############################################################################
 ##############  SPLIT TRAIN AND TEST DATA + RESHAPE DATA  ##################
@@ -71,25 +68,29 @@ data_plot(df)
 
 import math
 
+df = df_full['Close']
+
+print(df)
+
 # Train test split
 training_data_len = math.ceil(len(df) * .8)     # GRUPO : DECIDIR
 print(training_data_len)
 
 # Splitting the dataset
-train_data = df[:training_data_len].iloc[:, :1]
-test_data = df[training_data_len:].iloc[:, :1]
+train_data = df[:training_data_len].iloc[:, 0:n_tickers]
+test_data = df[training_data_len:].iloc[:, :n_tickers]
 print(train_data.shape, test_data.shape)
 
 # Selecting Open Price values
-dataset_train = train_data.Open.values  # GRUPO : CLOSE
+dataset_train = train_data.values  # GRUPO : CLOSE
 # Reshaping 1D to 2D array
-dataset_train = np.reshape(dataset_train, (-1, 1))
+dataset_train = np.reshape(dataset_train, (-1, n_tickers))
 print(dataset_train.shape)
 
 # Selecting Open Price values
-dataset_test = test_data.Open.values    # GRUPO : CLOSE
+dataset_test = test_data.values    # GRUPO : CLOSE
 # Reshaping 1D to 2D array
-dataset_test = np.reshape(dataset_test, (-1, 1))
+dataset_test = np.reshape(dataset_test, (-1, n_tickers))
 print(dataset_test.shape)
 
 ############################################################################
@@ -98,13 +99,15 @@ print(dataset_test.shape)
 
 from sklearn.preprocessing import MinMaxScaler
 
-scaler = MinMaxScaler(feature_range=(0, 1))     # GRUPO : DECIDIR
+scaler = MinMaxScaler(feature_range=(0, 1),clip=True)     # GRUPO : DECIDIR
 # Scaling dataset - FIT SÓ AQUI
 scaled_train = scaler.fit_transform(dataset_train)
+np.nan_to_num(scaled_train,copy=False,nan=0.0)
 print(scaled_train[:5])
 
 # Normalizing values between 0 and 1 - AQUI SÓ TRANSFORM
-scaled_test = scaler.fit_transform(dataset_test)
+scaled_test = scaler.transform(dataset_test)
+np.nan_to_num(scaled_test,copy=False,nan=0.0)
 print(scaled_test[:5])
 
 ############################################################################
@@ -117,16 +120,16 @@ print(scaled_test[:5])
 sequence_length_train = 50  # Number of time steps to look back   / # GRUPO : VERIFICAR
 X_train, y_train = [], []
 for i in range(len(scaled_train) - sequence_length_train):
-    X_train.append(scaled_train[i:i + sequence_length_train])
-    y_train.append(scaled_train[i + sequence_length_train])  # Predicting the value right after the sequence
+    X_train.append(scaled_train[i:i + sequence_length_train,0:n_tickers])
+    y_train.append(scaled_train[i + sequence_length_train,n_tickers-1:])  # Predicting the value right after the sequence
 X_train, y_train = np.array(X_train), np.array(y_train)
 
 # Create sequences and labels for testing data
-sequence_length_test = 30  # Number of time steps to look back   / # GRUPO : COLOCAR IGUAL
+sequence_length_test = 50  # Number of time steps to look back   / # GRUPO : COLOCAR IGUAL
 X_test, y_test = [], []
 for i in range(len(scaled_test) - sequence_length_test):
-    X_test.append(scaled_test[i:i + sequence_length_test])
-    y_test.append(scaled_test[i + sequence_length_test])  # Predicting the value right after the sequence
+    X_test.append(scaled_test[i:i + sequence_length_test,0:n_tickers])
+    y_test.append(scaled_test[i + sequence_length_test,n_tickers-1:])  # Predicting the value right after the sequence
 X_test, y_test = np.array(X_test), np.array(y_test)
 
 ############################################################################
@@ -172,24 +175,24 @@ class LSTMModel(nn.Module):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 
-input_size = 1          # GRUPO : HYPERPARAMETROS
-num_layers = 50          # GRUPO : HYPERPARAMETROS
-hidden_size = 50       # GRUPO : HYPERPARAMETROS
+input_size = n_tickers          # GRUPO : HYPERPARAMETROS
+num_layers = 10         # GRUPO : HYPERPARAMETROS
+hidden_size = 100       # GRUPO : HYPERPARAMETROS
 output_size = 1
 dropout = 0.2           # Regulatization // GRUPO : HYPERPARAMETROS
-learning_rate = 0.0005  # GRUPO : HYPERPARAMETROS
+learning_rate = 0.001  # GRUPO : HYPERPARAMETROS
 
 model = LSTMModel(input_size, hidden_size, num_layers, dropout).to(device)
 loss_fn = nn.MSELoss(reduction='mean')  # GRUPO : DECIDIR
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)  # GRUPO : DECIDIR
 
-batch_size = 60  # GRUPO : VERIFICAR
+batch_size = 30  # GRUPO : VERIFICAR
 train_dataset = TensorDataset(X_train, y_train)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_dataset = TensorDataset(X_test, y_test)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-num_epochs = 200  # GRUPO : HYPERPARAMETROS
+num_epochs = 10  # GRUPO : HYPERPARAMETROS
 train_hist = []
 test_hist = []
 
@@ -276,21 +279,25 @@ with mlflow.start_run():
     plt.plot(x,train_hist,scalex=True, label="Training loss")
     plt.plot(x, test_hist, label="Test loss")
     plt.legend()
-    plt.show()
+    plt.show(block=False)
 
     ############################################################################
     #################### PREDICT // FORECAST RESULTS  ##########################
     ############################################################################
 
-    num_forecast_steps = 30
+    num_forecast_steps = 10
     sequence_to_plot = X_test.squeeze().cpu().numpy()
+    print(sequence_to_plot.shape)
     historical_data = sequence_to_plot[-1]
+    print(historical_data.shape)
 
     forecasted_values = []
     with torch.no_grad():
         for _ in range(num_forecast_steps):
-            historical_data_tensor = torch.as_tensor(historical_data).view(1, -1, 1).float().to(device)
+            historical_data_tensor = torch.as_tensor(historical_data).view(1, -1, n_tickers).float().to(device)
+            print(historical_data_tensor.shape)
             predicted_value = model(historical_data_tensor).cpu().numpy()[0, 0]
+            print(predicted_value.shape)
             forecasted_values.append(predicted_value)
             historical_data = np.roll(historical_data, shift=-1)
             historical_data[-1] = predicted_value
@@ -305,16 +312,16 @@ with mlflow.start_run():
     from pylab import rcParams
 
     plt.rcParams['figure.figsize'] = [14, 4]
-    plt.plot(test_data.index[-100:], test_data.Open[-100:], label="test_data", color="b")
-    plt.plot(test_data.index[-30:], test_data.Open[-30:], label='actual values', color='green')
-    plt.plot(test_data.index[-1:].append(future_dates), np.concatenate([test_data.Open[-1:], scaler.inverse_transform(np.array(forecasted_values).reshape(-1, 1)).flatten()]), label='forecasted values', color='red')
+    plt.plot(test_data.index[-100:], test_data[-100:], label="test_data", color="b")
+    plt.plot(test_data.index[-30:], test_data[-30:], label='actual values', color='green')
+    plt.plot(test_data.index[-1:].append(future_dates), np.concatenate([test_data[-1:], scaler.inverse_transform(np.array(forecasted_values).reshape(-1, 1)).flatten()]), label='forecasted values', color='red')
 
     plt.xlabel('Time Step')
     plt.ylabel('Value')
     plt.legend()
     plt.title('Time Series Forecasting')
     plt.grid(True)
-    plt.show()
+    plt.show(block=False)
 
     ############################################################################
     #######################   PERFORMANCE METRICS   ###########################
